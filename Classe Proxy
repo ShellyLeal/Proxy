@@ -5,7 +5,7 @@ import java.net.*;
 interface mySockets { // métodos a serem implementados pelo proxy
 	String readLine();
 
-	void wrtieLine(String myString);
+	void writeLine(String myString);
 
 	void dispose();
 }
@@ -39,7 +39,7 @@ public class Proxy implements mySockets {
 		return myString;
 	}
 
-	public void wrtieLine(String myString) { // passa a informação para a saída de dados para o cliente
+	public void writeLine(String myString) { // passa a informação para a saída de dados para o cliente
 		myOut.println(myString);
 	}
 

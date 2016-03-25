@@ -1,0 +1,53 @@
+//Definindo a classe principal (descrita sem o método main)
+import java.io.*;
+import java.net.*;
+
+interface mySockets { // métodos a serem implementados pelo proxy
+	String readLine();
+
+	void wrtieLine(String myString);
+
+	void dispose();
+}
+
+public class Proxy implements mySockets {
+	private Socket mySocket;
+	private BufferedReader myIn;
+	private PrintWriter myOut;
+
+	public Proxy(String myHost, int myPort, boolean myWait) {// endereço IP do host, a porta, e um flag para a conexão
+		try {
+			if (myWait) { // espera a conexão válida
+				ServerSocket myServer = new ServerSocket(myPort);
+				mySocket = myServer.accept();
+			} else
+				mySocket = new Socket(myHost, myPort);
+			myIn = new BufferedReader(new InputStreamReader(mySocket.getInputStream()));
+			myOut = new PrintWriter(mySocket.getOutputStream(), true); // encaminha a informação
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String readLine() {  // lê a entrada de dados e fornece um retorno ao método writeLine
+		String myString = null;
+		try {
+			myString = myIn.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return myString;
+	}
+
+	public void wrtieLine(String myString) { // passa a informação para a saída de dados para o cliente
+		myOut.println(myString);
+	}
+
+	public void dispose() { // servidor proxy completo, socket de rede é fechado
+		try {
+			mySocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}

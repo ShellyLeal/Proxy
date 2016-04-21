@@ -1,0 +1,40 @@
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class Cliente {
+public static void main(String[] args) throws Exception {
+
+	System.out.println("Iniciando cliente");
+	System.out.println("Conectando ao servidor");
+	Socket socket = new Socket("localhost",2525);
+    System.out.println("Conexão estabelecida");
+    InputStream input = socket.getInputStream();
+    OutputStream output = socket.getOutputStream();
+    
+    BufferedReader in = new BufferedReader(new InputStreamReader(input));
+    PrintStream out = new PrintStream(output);
+    Scanner scanner = new Scanner(System.in);
+    
+    	System.out.println("Digite o path: ");
+    	//path de teste: C:\Users\Shelly\Desktop\YouTube.html
+    	String path = scanner.nextLine();
+    	String mensagem = "GET " + path + "\n\n";
+    	out.println(mensagem);
+    	out.flush();
+    	
+    	int c;
+    	while((c=in.read()) != -1) 
+    	System.out.print((char) c);
+   
+    	System.out.println("\nEncerrando conexão.");
+    	in.close();
+    	out.close();
+    	scanner.close();
+    	socket.close();
+}
+}

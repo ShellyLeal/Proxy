@@ -1,6 +1,6 @@
-//Definindo a classe principal (descrita sem o método main)
 import java.io.*;
 import java.net.*;
+import java.util.StringTokenizer;
 
 interface mySockets { // métodos a serem implementados pelo proxy
 	String readLine();
@@ -10,44 +10,73 @@ interface mySockets { // métodos a serem implementados pelo proxy
 	void dispose();
 }
 
-public class Proxy implements mySockets {
+public class Proxy { 
 	private Socket mySocket;
+	private ServerSocket myServer;
 	private BufferedReader myIn;
-	private PrintWriter myOut;
+	private PrintStream myOut;
 
-	public Proxy(String myHost, int myPort, boolean myWait) {// endereço IP do host, a porta, e um flag para a conexão
+	public Proxy(String myHost, int myPort, boolean myWait) { // endereço IP do host, a porta, e um flag para aguardar a conexão
+		
+		
 		try {
-			if (myWait) { // espera a conexão válida
-				ServerSocket myServer = new ServerSocket(myPort);
+			if (myWait) { // aguarda a conexão 
+				System.out.println("Iniciando servidor");
+				myServer = new ServerSocket(myPort);
+				System.out.println("Aguardando conexão...");
 				mySocket = myServer.accept();
-			} else
+				System.out.println("Conexão estabelecida.");
+			} 
+			else
 				mySocket = new Socket(myHost, myPort);
+				
+           
 			myIn = new BufferedReader(new InputStreamReader(mySocket.getInputStream()));
-			myOut = new PrintWriter(mySocket.getOutputStream(), true); // encaminha a informação
-		} catch (IOException e) {
+			myOut = new PrintStream(mySocket.getOutputStream()); // encaminha a informação
+		
+				try {
+				String mensagem = myIn.readLine();
+				System.out.println("Mensagem recebida do cliente ["
+				+mySocket.getInetAddress().getHostName()+"]: "+
+				mensagem);
+				StringTokenizer t = new StringTokenizer(mensagem);
+				String token = t.nextToken();
+				int c;
+				String resource = null;
+				if(token.equals("GET"))
+					resource = t.nextToken();
+				FileInputStream f = new FileInputStream(resource);
+				while((c = f.read()) != -1)
+					myOut.write(c);
+				f.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			
+				System.out.println("Encerrando conexão.");
+				myIn.close();
+				myOut.close();
+			
+				mySocket.close();
+				
+				System.out.println("Encerrando servidor");
+				myServer.close();
+			
+				
+           
+		} catch (IOException e) { 
 			e.printStackTrace();
 		}
 	}
 
-	public String readLine() {  // lê a entrada de dados e fornece um retorno ao método writeLine
-		String myString = null;
-		try {
-			myString = myIn.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return myString;
-	}
 
-	public void writeLine(String myString) { // passa a informação para a saída de dados para o cliente
-		myOut.println(myString);
-	}
 
-	public void dispose() { // servidor proxy completo, socket de rede é fechado
-		try {
-			mySocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public static void main(String[] args){
+
+			Proxy p = new Proxy("localhost",2525,true);
+			
+		
 	}
+	
 }
